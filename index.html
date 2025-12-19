@@ -1,0 +1,1986 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PC Replacement Planner</title>
+  <style>
+    /* =========================================================
+       THEME TOKENS (set via [data-theme])
+       ========================================================= */
+
+    /* LIGHT MODE (default) */
+    :root{
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --muted: #52627a;
+      --text: #0d1320;
+
+      --ok: #2dbb6b;
+      --danger: #e5484d;
+
+      --accent: #2563eb;
+      --accent2: #7c3aed;
+      --outline: rgba(13,19,32,.10);
+      --outlineStrong: rgba(13,19,32,.18);
+      --panel: rgba(37,99,235,.06);
+      --panel2: rgba(13,19,32,.03);
+      --shadow: rgba(0,0,0,.10);
+      --fadeEdge: rgba(246,248,252,.96);
+    }
+
+    /* DARK MODE (neutral dark) */
+    [data-theme="dark"]{
+      --bg: #0b0f17;
+      --card: #121a27;
+      --muted: #9fb0c8;
+      --text: #eaf1ff;
+
+      --ok: #43d17a;
+      --danger: #ff6b6b;
+
+      --accent: #66a3ff;
+      --accent2: #8a5cff;
+      --outline: rgba(255,255,255,.10);
+      --outlineStrong: rgba(255,255,255,.18);
+      --panel: rgba(255,255,255,.04);
+      --panel2: rgba(0,0,0,.18);
+      --shadow: rgba(0,0,0,.35);
+      --fadeEdge: rgba(11,15,23,.95);
+    }
+
+    /* Sundance theme (black + orange) */
+    [data-theme="sundance"]{
+      --bg: #060607;
+      --card: #101114;
+      --muted: #c0c6d4;
+      --text: #f6f7fb;
+
+      --ok: #3ee08a;
+      --danger: #ff6b6b;
+
+      --accent: #ff7a00;
+      --accent2: #ffb000;
+      --outline: rgba(255,255,255,.10);
+      --outlineStrong: rgba(255,255,255,.22);
+      --panel: rgba(255,122,0,.10);
+      --panel2: rgba(0,0,0,.22);
+      --shadow: rgba(0,0,0,.40);
+      --fadeEdge: rgba(6,6,7,.97);
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* top brand strip */
+    .brandTop{
+      border-bottom: 1px solid var(--outline);
+      padding: 14px 20px;
+      display:flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .brandLeft{
+      display:flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .brandLogo{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+    .brandLogo img{
+      height: 44px;
+      width: auto;
+      max-width: min(420px, 90vw);
+      object-fit: contain;
+      display:block;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.18));
+    }
+    .brandContact{
+      display:flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.2;
+    }
+    .brandContact .line1{
+      font-weight: 900;
+      letter-spacing: .2px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .brandContact .line2{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    header{
+      padding: 14px 20px 18px;
+      display:flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    header h1{ margin:0; font-size: 20px; }
+    header p{ margin:6px 0 0; color: var(--muted); font-size: 13px; max-width: 980px; }
+
+    main{
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    .row{ display:flex; gap:10px; flex-wrap: wrap; align-items: center; }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--outline);
+      border-radius: 14px;
+      padding: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 26px var(--shadow);
+    }
+    .card h2{ margin: 0 0 10px; font-size: 16px; }
+    .muted{ color: var(--muted); font-size: 13px; }
+
+    .btn{
+      appearance:none;
+      border: 1px solid var(--outlineStrong);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor:pointer;
+      font-weight: 700;
+      user-select:none;
+    }
+    .btn:hover{ border-color: color-mix(in srgb, var(--accent) 40%, var(--outlineStrong)); }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+    .btn.primary{
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 30%, transparent),
+        color-mix(in srgb, var(--accent2) 22%, transparent)
+      );
+      border-color: color-mix(in srgb, var(--accent) 62%, transparent);
+    }
+    .btn.danger{
+      background: color-mix(in srgb, var(--danger) 18%, transparent);
+      border-color: color-mix(in srgb, var(--danger) 42%, transparent);
+    }
+
+    input, select, textarea{
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--outlineStrong);
+      background: var(--panel2);
+      color: var(--text);
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    textarea{ min-height: 34px; resize: vertical; }
+
+    /* Theme controls */
+    .themeBar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .themePill{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--outlineStrong);
+      background: color-mix(in srgb, var(--panel) 75%, transparent);
+    }
+    .themePill .label{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
+    .toggle{
+      display:flex;
+      border-radius: 999px;
+      border: 1px solid var(--outlineStrong);
+      overflow:hidden;
+    }
+    .toggle button{
+      border:0;
+      background: transparent;
+      color: var(--muted);
+      padding: 7px 10px;
+      font-weight: 900;
+      cursor:pointer;
+      font-size: 12px;
+    }
+    .toggle button.active{
+      color: var(--text);
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 28%, transparent),
+        color-mix(in srgb, var(--accent2) 18%, transparent)
+      );
+    }
+    .brandSelect{ min-width: 150px; font-weight: 900; }
+
+    /* Client info grid */
+    .formGrid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .field label{
+      display:block;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing:.2px;
+    }
+    @media (max-width: 1100px){
+      .formGrid{ grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 620px){
+      .formGrid{ grid-template-columns: 1fr; }
+    }
+
+    /* Table */
+    table{ width: max-content; border-collapse: collapse; border-radius: 12px; }
+    th, td{ padding: 10px 12px; border-bottom: 1px solid var(--outline); text-align:left; vertical-align: top; }
+    th{ font-size: 12px; color: var(--muted); font-weight: 900; white-space: nowrap; }
+    td{ font-size: 13px; }
+    tr:hover td{ background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+    /* Duplicate highlight */
+    tr.dup td{
+      background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
+      border-bottom-color: color-mix(in srgb, var(--danger) 30%, var(--outline)) !important;
+    }
+
+    /* Min widths */
+    th:nth-child(1),  td:nth-child(1)  { min-width: 170px; }
+    th:nth-child(2),  td:nth-child(2)  { min-width: 120px; }
+    th:nth-child(3),  td:nth-child(3)  { min-width: 180px; }
+    th:nth-child(4),  td:nth-child(4)  { min-width: 140px; }
+    th:nth-child(5),  td:nth-child(5)  { min-width: 180px; }
+    th:nth-child(6),  td:nth-child(6)  { min-width: 160px; }
+    th:nth-child(7),  td:nth-child(7)  { min-width: 160px; }
+    th:nth-child(8),  td:nth-child(8)  { min-width: 170px; }
+    th:nth-child(9),  td:nth-child(9)  { min-width: 160px; }
+    th:nth-child(10), td:nth-child(10) { min-width: 170px; }
+    th:nth-child(11), td:nth-child(11) { min-width: 170px; }
+    th:nth-child(12), td:nth-child(12) { min-width: 180px; }
+    th:nth-child(13), td:nth-child(13) { min-width: 200px; }
+    th:nth-child(14), td:nth-child(14) { min-width: 160px; }
+    th:nth-child(15), td:nth-child(15) { min-width: 180px; }
+    th:nth-child(16), td:nth-child(16) { min-width: 140px; }
+    th:nth-child(17), td:nth-child(17) { min-width: 260px; }
+    th:nth-child(18), td:nth-child(18) { min-width: 120px; }
+
+    .pill{ display:inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 900; }
+    .pill.ok{ background: color-mix(in srgb, var(--ok) 18%, transparent); border: 1px solid color-mix(in srgb, var(--ok) 40%, transparent); color: var(--ok); }
+    .pill.bad{ background: color-mix(in srgb, var(--danger) 16%, transparent); border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent); color: var(--danger); }
+
+    .small{ font-size: 12px; color: var(--muted); }
+    .right{ text-align:right; }
+    details summary{ cursor:pointer; color: var(--muted); }
+    .file{ color: var(--muted); font-size: 12px; }
+    .warn{ color: #ffd166; }
+
+    .split{ display:grid; gap:16px; grid-template-columns: 1.15fr .85fr; }
+    @media (max-width: 1100px){ .split{ grid-template-columns: 1fr; } }
+
+    .kpi{ display:flex; gap:10px; flex-wrap: wrap; }
+    .kpi .box{ flex:1 1 200px; padding: 10px; border-radius: 12px; border: 1px solid var(--outline); background: var(--panel); }
+    .kpi .label{ font-size: 12px; color: var(--muted); font-weight: 900; }
+    .kpi .value{ font-size: 18px; font-weight: 950; margin-top: 4px; }
+
+    /* Timeline */
+    .timeline{ display:grid; gap:8px; }
+    .barRow{ display:grid; grid-template-columns: 170px 1fr 140px; gap:10px; align-items:center; }
+    .bar{ height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow:hidden; }
+    .bar > span{ display:block; height:100%; background: color-mix(in srgb, var(--accent) 70%, transparent); width: 0%; }
+
+    .stickyReport{ position: sticky; top: 12px; }
+
+    /* Scrollable table with arrows */
+    .tableOuter{
+      position: relative;
+      margin-top: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--outline);
+      background: rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .tableWrap{
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      max-width: 100%;
+      padding: 0 54px 6px 54px;
+    }
+    .tableWrap::-webkit-scrollbar{ height: 10px; }
+    .tableWrap::-webkit-scrollbar-track{ background: rgba(255,255,255,.06); border-radius: 999px; }
+    .tableWrap::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.18); border-radius: 999px; }
+    .tableOuter:hover .tableWrap::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.28); }
+
+    .scrollBtn{
+      position:absolute;
+      top:50%;
+      transform: translateY(-50%);
+      width:42px; height:42px;
+      border-radius:999px;
+      border: 1px solid var(--outlineStrong);
+      background: rgba(0,0,0,.35);
+      color: var(--text);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .15s ease, background .15s ease;
+      user-select:none;
+      z-index: 6;
+    }
+    .tableOuter:hover .scrollBtn{ opacity:1; pointer-events:auto; }
+    .scrollBtn:hover{ background: rgba(0,0,0,.55); }
+    .scrollBtn.left{ left: 10px; }
+    .scrollBtn.right{ right: 10px; }
+
+    .fadeEdge{
+      position:absolute;
+      top:0; bottom:0;
+      width:54px;
+      pointer-events:none;
+      z-index:5;
+      opacity:0;
+      transition: opacity .15s ease;
+    }
+    .tableOuter:hover .fadeEdge{ opacity:1; }
+    .fadeEdge.left{ left:0; background: linear-gradient(to right, var(--fadeEdge), rgba(0,0,0,0)); }
+    .fadeEdge.right{ right:0; background: linear-gradient(to left, var(--fadeEdge), rgba(0,0,0,0)); }
+
+    .hint{
+      font-size:12px;
+      color: var(--muted);
+      font-weight:800;
+      margin-left:auto;
+      white-space:nowrap;
+    }
+
+    /* Toolbar enhancements */
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--outline);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+    }
+    .toolGroup{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .toolLabel{
+      font-size:12px;
+      font-weight:900;
+      color: var(--muted);
+      letter-spacing:.2px;
+    }
+    .toolInline{
+      min-width: 220px;
+      max-width: 420px;
+      flex: 1 1 260px;
+    }
+    .toolSelect{
+      min-width: 180px;
+      max-width: 260px;
+    }
+    .statusDot{
+      width: 8px;
+      height: 8px;
+      border-radius:999px;
+      background: color-mix(in srgb, var(--ok) 85%, transparent);
+      display:inline-block;
+      margin-right:8px;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 18%, transparent);
+    }
+    .statusDot.saving{
+      background: color-mix(in srgb, var(--accent) 85%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    .statusDot.off{
+      background: color-mix(in srgb, var(--muted) 60%, transparent);
+      box-shadow:none;
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+  <section class="brandTop">
+    <div class="brandLeft">
+      <div class="brandLogo">
+        <img
+          src="https://sundancenetworks.com/wp-content/uploads/2025/09/sundance-logo-horiz-trans-scaled.png"
+          alt="Sundance Networks logo"
+          loading="eager"
+        />
+      </div>
+      <div class="brandContact">
+        <div class="line1">811 Ann St. Stroudsburg Pa 18360</div>
+        <div class="line2">570-476-1320</div>
+      </div>
+    </div>
+
+    <div class="themeBar">
+      <div class="themePill">
+        <span class="label">Theme</span>
+        <select id="brandSelect" class="brandSelect" title="Choose theme">
+          <option value="standard">Standard</option>
+          <option value="sundance">Sundance</option>
+        </select>
+      </div>
+
+      <div class="themePill">
+        <span class="label">Mode</span>
+        <div class="toggle" role="group" aria-label="Light or dark mode">
+          <button id="btnLight" type="button">Light</button>
+          <button id="btnDark" type="button">Dark</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <header>
+    <div>
+      <h1>PC Replacement Planner</h1>
+      <p>Import a spreadsheet (Excel/CSV) with your headers, or add PCs manually. Mark <b>Good</b> or <b>Needs Replaced</b>, then generate a timeline + cost report.</p>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="card" id="clientCard">
+      <h2>Client Information</h2>
+      <p class="muted" style="margin-top:-2px;">This information will appear in the on-page reports and PDF export.</p>
+
+      <div class="formGrid">
+        <div class="field">
+          <label for="clientName">Client Name</label>
+          <input id="clientName" type="text" placeholder="e.g. ABC Manufacturing" />
+        </div>
+
+        <div class="field">
+          <label for="clientPhone">Client Phone</label>
+          <input id="clientPhone" type="text" placeholder="e.g. 555-123-4567" />
+        </div>
+
+        <div class="field">
+          <label for="clientEmail">Main Email</label>
+          <input id="clientEmail" type="email" placeholder="e.g. it@client.com" />
+        </div>
+
+        <div class="field">
+          <label for="clientAddress">Client Address</label>
+          <input id="clientAddress" type="text" placeholder="Street, City, State ZIP" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="btnSaveClient">Save Client Info</button>
+        <button class="btn danger" id="btnClearClient">Clear Client Info</button>
+        <span class="small" id="clientSavedHint" style="margin-left:auto;"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>1) Import Spreadsheet (Excel / CSV)</h2>
+      <div class="row">
+        <input id="fileInput" type="file" accept=".xlsx,.xls,.csv" />
+        <button class="btn" id="btnDownloadTemplate">Download CSV Template</button>
+        <button class="btn danger" id="btnClearAll">Clear All</button>
+      </div>
+      <p class="file" id="fileStatus">No file loaded.</p>
+
+      <details>
+        <summary>Expected headers (click to expand)</summary>
+        <div class="muted" style="margin-top:8px;">
+          Hostname, Site, Last Seen, Type, Last User, OS, Manufacturer, Serial Number, Internal IP, Last Reboot, Memory (Usable), Device CPU, Model
+          <br><span class="small">Optional planner fields: Status, Replacement Date, Estimated Cost, Notes</span>
+        </div>
+      </details>
+
+      <p class="small" style="margin-top:10px;">
+        Tip: Excel import uses SheetJS (CDN). If you want zero external deps, export CSV and import that instead.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>2) Add / Edit PCs</h2>
+      <div class="row">
+        <button class="btn primary" id="btnAddRow">+ Add PC</button>
+        <button class="btn" id="btnGenerate">Generate Report</button>
+        <button class="btn" id="btnExportNeedsPDF">Export Needs-Replaced PDF</button>
+        <button class="btn" id="btnExportCSV">Export Current List (CSV)</button>
+
+        <button class="btn" id="btnUndo" title="Undo (Ctrl+Z)">Undo</button>
+        <button class="btn" id="btnRedo" title="Redo (Ctrl+Y / Ctrl+Shift+Z)">Redo</button>
+
+        <span class="hint" id="undoHint"></span>
+      </div>
+
+      <!-- NEW: Search / Filter / Sort Toolbar -->
+      <div class="toolbar" aria-label="Table toolbar">
+        <div class="toolGroup" style="flex:1 1 340px;">
+          <span class="toolLabel">Search</span>
+          <input id="searchInput" class="toolInline" type="text" placeholder="Search hostname, user, site, serial, IP, model…" />
+        </div>
+
+        <div class="toolGroup">
+          <span class="toolLabel">Show</span>
+          <select id="statusFilter" class="toolSelect" title="Filter by status">
+            <option value="all">All</option>
+            <option value="good">Good</option>
+            <option value="needs">Needs Replaced</option>
+          </select>
+        </div>
+
+        <div class="toolGroup">
+          <span class="toolLabel">Sort</span>
+          <select id="sortMode" class="toolSelect" title="Sort mode">
+            <option value="none">None</option>
+            <option value="needsDate">Needs Replaced: Replacement Date</option>
+            <option value="hostname">Hostname (A→Z)</option>
+          </select>
+        </div>
+
+        <div class="toolGroup" style="margin-left:auto;">
+          <span class="small" id="dupWarn"></span>
+        </div>
+
+        <div class="toolGroup">
+          <span class="small" id="saveStatus"><span class="statusDot off" id="saveDot"></span>Not saved yet</span>
+        </div>
+      </div>
+
+      <div class="tableOuter" id="tableOuter">
+        <div class="fadeEdge left"></div>
+        <div class="fadeEdge right"></div>
+
+        <div class="scrollBtn left" id="scrollLeft" title="Scroll left" aria-label="Scroll left">◀</div>
+        <div class="scrollBtn right" id="scrollRight" title="Scroll right" aria-label="Scroll right">▶</div>
+
+        <div class="tableWrap" id="tableWrap" aria-label="Device table scroll area">
+          <table id="pcTable">
+            <thead>
+              <tr>
+                <th>Hostname</th>
+                <th>Site</th>
+                <th>Last Seen</th>
+                <th>Type</th>
+                <th>Last User</th>
+                <th>OS</th>
+                <th>Manufacturer</th>
+                <th>Serial Number</th>
+                <th>Internal IP</th>
+                <th>Last Reboot</th>
+                <th>Memory (Usable)</th>
+                <th>Device CPU</th>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Replacement Date</th>
+                <th>Est. Cost</th>
+                <th>Notes</th>
+                <th class="right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pcTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="small" style="margin-top:10px;">
+        PDF export opens a clean print view (only “Needs Replaced”). Choose <b>Save as PDF</b> in your browser’s print dialog.
+      </p>
+    </section>
+
+    <section class="split">
+      <section class="card">
+        <h2>3) Report</h2>
+
+        <div id="clientReportBox" class="card" style="padding:12px; margin-bottom:12px; border-radius:12px;">
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:baseline;">
+            <div style="font-weight:950;">Client</div>
+            <div class="small" id="clientReportStamp"></div>
+          </div>
+          <div class="muted" id="clientReportDetails" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="kpi" id="kpiArea"></div>
+        <div id="reportArea" style="margin-top:12px;"></div>
+      </section>
+
+      <section class="card stickyReport">
+        <h2>Timeline (Needs Replaced)</h2>
+        <p class="muted" style="margin-top:0;">Budget view: Year → Month (Replacement Date).</p>
+        <div id="timelineArea" class="timeline"></div>
+        <p class="small" id="timelineHint"></p>
+      </section>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+
+    const BRAND = {
+      logoUrl: "https://sundancenetworks.com/wp-content/uploads/2025/09/sundance-logo-horiz-trans-scaled.png",
+      address: "811 Ann St. Stroudsburg Pa 18360",
+      phone: "570-476-1320"
+    };
+
+    // ---------------- Utilities ----------------
+    const escapeHtml = (s) => (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+
+    const normalizeHeader = (h) => (h ?? "")
+      .toString().trim().toLowerCase()
+      .replaceAll("_"," ")
+      .replace(/\s+/g," ");
+
+    const parseDate = (val) => {
+      if (!val) return null;
+      if (val instanceof Date && !isNaN(val)) return val;
+      const s = val.toString().trim();
+      const d1 = new Date(s);
+      if (!isNaN(d1)) return d1;
+      const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (m) {
+        const mm = Number(m[1]), dd = Number(m[2]), yy = Number(m[3]);
+        const d2 = new Date(yy, mm-1, dd);
+        if (!isNaN(d2)) return d2;
+      }
+      return null;
+    };
+
+    const fmtDate = (d) => {
+      if (!d || !(d instanceof Date) || isNaN(d)) return "";
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const fmtMoney = (n) => {
+      const num = Number(n);
+      if (!isFinite(num)) return "";
+      return num.toLocaleString(undefined, { style:"currency", currency:"USD" });
+    };
+
+    const moneyToNumber = (v) => {
+      if (v === null || v === undefined || v === "") return 0;
+      if (typeof v === "number") return v;
+      const s = v.toString().replace(/[^0-9.\-]/g, "");
+      const n = Number(s);
+      return isFinite(n) ? n : 0;
+    };
+
+    function monthName(mm){
+      const names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      return names[Math.max(1, Math.min(12, mm)) - 1];
+    }
+
+    function fmtDateHuman(d){
+      const dd = (d instanceof Date) ? d : parseDate(d);
+      if (!dd) return "";
+      return dd.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+    }
+
+    function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+    // ---------------- Theme handling ----------------
+    const THEME_KEY = "pc_planner_theme_v3";
+    const brandSelect = $("#brandSelect");
+    const btnLight = $("#btnLight");
+    const btnDark  = $("#btnDark");
+
+    function setModeButton(mode){
+      btnLight.classList.toggle("active", mode === "light");
+      btnDark.classList.toggle("active", mode === "dark");
+    }
+
+    function applyTheme({brand, mode}){
+      const theme = (brand === "sundance") ? "sundance" : (mode === "dark" ? "dark" : "light");
+      document.body.setAttribute("data-theme", theme);
+      brandSelect.value = brand;
+      setModeButton(mode);
+      localStorage.setItem(THEME_KEY, JSON.stringify({brand, mode}));
+    }
+
+    function loadTheme(){
+      try{
+        const raw = localStorage.getItem(THEME_KEY);
+        if (!raw) return { brand:"standard", mode:"light" };
+        const obj = JSON.parse(raw);
+        return {
+          brand: (obj.brand === "sundance") ? "sundance" : "standard",
+          mode: (obj.mode === "dark") ? "dark" : "light"
+        };
+      } catch {
+        return { brand:"standard", mode:"light" };
+      }
+    }
+
+    let themeState = loadTheme();
+    applyTheme(themeState);
+
+    brandSelect.addEventListener("change", () => {
+      themeState.brand = (brandSelect.value === "sundance") ? "sundance" : "standard";
+      applyTheme(themeState);
+    });
+    btnLight.addEventListener("click", () => { themeState.mode = "light"; applyTheme(themeState); });
+    btnDark.addEventListener("click", () => { themeState.mode = "dark"; applyTheme(themeState); });
+
+    // ---------------- Client info ----------------
+    const CLIENT_KEY = "pc_planner_client_v1";
+
+    function loadClient(){
+      try{
+        const raw = localStorage.getItem(CLIENT_KEY);
+        if (!raw) return { name:"", address:"", phone:"", email:"" };
+        const c = JSON.parse(raw);
+        return {
+          name: (c.name ?? "").toString(),
+          address: (c.address ?? "").toString(),
+          phone: (c.phone ?? "").toString(),
+          email: (c.email ?? "").toString()
+        };
+      } catch {
+        return { name:"", address:"", phone:"", email:"" };
+      }
+    }
+    function saveClient(client){
+      localStorage.setItem(CLIENT_KEY, JSON.stringify(client));
+    }
+    function setClientSavedHint(msg){
+      const el = $("#clientSavedHint");
+      el.textContent = msg;
+      if (!msg) return;
+      setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 2500);
+    }
+    function populateClientForm(client){
+      $("#clientName").value = client.name || "";
+      $("#clientAddress").value = client.address || "";
+      $("#clientPhone").value = client.phone || "";
+      $("#clientEmail").value = client.email || "";
+    }
+    function getClientFromForm(){
+      return {
+        name: $("#clientName").value.trim(),
+        address: $("#clientAddress").value.trim(),
+        phone: $("#clientPhone").value.trim(),
+        email: $("#clientEmail").value.trim()
+      };
+    }
+    function renderClientBox(){
+      const client = loadClient();
+      const stamp = new Date().toLocaleString();
+      $("#clientReportStamp").textContent = `Last refreshed: ${stamp}`;
+
+      const lines = [];
+      lines.push(`<b>${client.name ? escapeHtml(client.name) : "—"}</b>`);
+      if (client.address) lines.push(`${escapeHtml(client.address)}`);
+      const phoneEmail = [client.phone, client.email].filter(Boolean).map(escapeHtml).join(" • ");
+      if (phoneEmail) lines.push(phoneEmail);
+      $("#clientReportDetails").innerHTML = lines.join("<br>");
+      return client;
+    }
+
+    // ---------------- Data Model ----------------
+    function newBlankPC() {
+      return {
+        hostname: "",
+        site: "",
+        lastSeen: "",
+        type: "",
+        lastUser: "",
+        os: "",
+        manufacturer: "",
+        serialNumber: "",
+        internalIP: "",
+        lastReboot: "",
+        memoryUsable: "",
+        deviceCPU: "",
+        model: "",
+        status: "Good",
+        replacementDate: "",
+        estimatedCost: "",
+        notes: ""
+      };
+    }
+
+    let pcs = [];
+
+    // ---------------- Auto-save / Restore (NEW) ----------------
+    const STATE_KEY = "pc_planner_state_v1";
+    let saveTimer = null;
+
+    function setSaveUI(state, msg){
+      const dot = $("#saveDot");
+      const text = $("#saveStatus");
+      if (state === "saving"){
+        dot.classList.remove("off"); dot.classList.add("saving");
+        text.innerHTML = `<span class="statusDot saving" id="saveDot"></span>${escapeHtml(msg || "Saving…")}`;
+      } else if (state === "saved"){
+        text.innerHTML = `<span class="statusDot" id="saveDot"></span>${escapeHtml(msg || "Saved")}`;
+      } else {
+        text.innerHTML = `<span class="statusDot off" id="saveDot"></span>${escapeHtml(msg || "Not saved yet")}`;
+      }
+    }
+
+    function scheduleSave(){
+      setSaveUI("saving","Saving…");
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        try{
+          const state = { pcs: deepClone(pcs), client: loadClient() };
+          localStorage.setItem(STATE_KEY, JSON.stringify(state));
+          setSaveUI("saved", `Saved • ${new Date().toLocaleTimeString()}`);
+        } catch {
+          setSaveUI("off","Auto-save failed");
+        }
+      }, 500);
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(STATE_KEY);
+        if (!raw) return null;
+        const s = JSON.parse(raw);
+        if (!s || !Array.isArray(s.pcs)) return null;
+        return s;
+      } catch {
+        return null;
+      }
+    }
+
+    // ---------------- Undo/Redo ----------------
+    const HISTORY_LIMIT = 140;
+    let undoStack = [];
+    let redoStack = [];
+    let historyPaused = false;
+
+    function getAppState(){
+      return { pcs: deepClone(pcs), client: deepClone(loadClient()) };
+    }
+
+    function applyAppState(state){
+      pcs = deepClone(state.pcs || []);
+      saveClient(state.client || { name:"", address:"", phone:"", email:"" });
+      populateClientForm(loadClient());
+      renderClientBox();
+      renderTable();
+      updateUndoUI();
+      scheduleSave();
+    }
+
+    function pushHistory(reason=""){
+      if (historyPaused) return;
+      const snapshot = getAppState();
+      const last = undoStack.length ? undoStack[undoStack.length - 1] : null;
+      if (last && JSON.stringify(last.state) === JSON.stringify(snapshot)) return;
+
+      undoStack.push({ state: snapshot, reason, t: Date.now() });
+      if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+      redoStack = [];
+      updateUndoUI();
+    }
+
+    function undo(){
+      if (undoStack.length < 2) return;
+      const current = undoStack.pop();
+      redoStack.push(current);
+      const prev = undoStack[undoStack.length - 1];
+      applyAppState(prev.state);
+      setUndoHint(`Undid: ${prev.reason || "change"}`);
+    }
+
+    function redo(){
+      if (!redoStack.length) return;
+      const next = redoStack.pop();
+      undoStack.push(next);
+      applyAppState(next.state);
+      setUndoHint(`Redid: ${next.reason || "change"}`);
+    }
+
+    function updateUndoUI(){
+      $("#btnUndo").disabled = undoStack.length < 2;
+      $("#btnRedo").disabled = redoStack.length === 0;
+    }
+
+    let hintTimer = null;
+    function setUndoHint(msg){
+      const el = $("#undoHint");
+      el.textContent = msg;
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 2200);
+    }
+
+    // ---------------- Filtering / Sorting (NEW) ----------------
+    function getViewConfig(){
+      return {
+        q: ($("#searchInput").value || "").trim().toLowerCase(),
+        status: $("#statusFilter").value,
+        sort: $("#sortMode").value
+      };
+    }
+
+    function pcMatchesQuery(pc, q){
+      if (!q) return true;
+      const hay = [
+        pc.hostname, pc.site, pc.lastUser, pc.serialNumber, pc.internalIP,
+        pc.model, pc.manufacturer, pc.os, pc.type
+      ].filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(q);
+    }
+
+    function computeDuplicates(){
+      const map = new Map();
+      pcs.forEach((p, i) => {
+        const h = (p.hostname || "").trim().toLowerCase();
+        if (!h) return;
+        if (!map.has(h)) map.set(h, []);
+        map.get(h).push(i);
+      });
+      const dups = new Set();
+      for (const arr of map.values()){
+        if (arr.length > 1) arr.forEach(i => dups.add(i));
+      }
+      return dups;
+    }
+
+    // ---------------- Rendering ----------------
+    function renderTable() {
+      const tbody = $("#pcTbody");
+      tbody.innerHTML = "";
+
+      const cfg = getViewConfig();
+      const dupIdx = computeDuplicates();
+
+      // build list of indices for view order
+      let idxs = pcs.map((_, i) => i);
+
+      // filter status
+      if (cfg.status === "good"){
+        idxs = idxs.filter(i => (pcs[i].status || "Good") === "Good");
+      } else if (cfg.status === "needs"){
+        idxs = idxs.filter(i => (pcs[i].status || "Good") === "Needs Replaced");
+      }
+
+      // search filter
+      if (cfg.q){
+        idxs = idxs.filter(i => pcMatchesQuery(pcs[i], cfg.q));
+      }
+
+      // sort
+      if (cfg.sort === "hostname"){
+        idxs.sort((a,b) => (pcs[a].hostname || "").localeCompare(pcs[b].hostname || ""));
+      } else if (cfg.sort === "needsDate"){
+        idxs.sort((a,b) => {
+          const A = pcs[a], B = pcs[b];
+          const aNeeds = (A.status || "Good") === "Needs Replaced";
+          const bNeeds = (B.status || "Good") === "Needs Replaced";
+          if (aNeeds !== bNeeds) return aNeeds ? -1 : 1;
+
+          const da = parseDate(A.replacementDate);
+          const db = parseDate(B.replacementDate);
+          if (da && db) return da - db;
+          if (da && !db) return -1;
+          if (!da && db) return 1;
+          return (A.hostname || "").localeCompare(B.hostname || "");
+        });
+      }
+
+      // duplicates warning UI
+      const dupCount = dupIdx.size;
+      $("#dupWarn").textContent = dupCount ? `⚠ Duplicate hostnames detected (${dupCount} row${dupCount===1?"":"s"})` : "";
+
+      idxs.forEach((idx) => {
+        const pc = pcs[idx];
+        const tr = document.createElement("tr");
+        if (dupIdx.has(idx)) tr.classList.add("dup");
+
+        function addInputCell(key, type="text", placeholder="") {
+          const td = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = type;
+          input.placeholder = placeholder;
+          input.value = pc[key] ?? "";
+
+          input.addEventListener("focus", () => pushHistory(`Edit ${key}`));
+          input.addEventListener("input", () => { pc[key] = input.value; scheduleSave(); });
+          input.addEventListener("blur", () => { pushHistory(`Edit ${key}`); renderTable(); });
+
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+
+        function addTextAreaCell(key, placeholder="") {
+          const td = document.createElement("td");
+          const ta = document.createElement("textarea");
+          ta.placeholder = placeholder;
+          ta.value = pc[key] ?? "";
+
+          ta.addEventListener("focus", () => pushHistory(`Edit ${key}`));
+          ta.addEventListener("input", () => { pc[key] = ta.value; scheduleSave(); });
+          ta.addEventListener("blur", () => pushHistory(`Edit ${key}`));
+
+          td.appendChild(ta);
+          tr.appendChild(td);
+        }
+
+        addInputCell("hostname", "text", "e.g. WS-1234");
+        addInputCell("site", "text", "e.g. HQ");
+        addInputCell("lastSeen", "text", "e.g. 2025-12-18 09:22");
+        addInputCell("type", "text", "e.g. Laptop");
+        addInputCell("lastUser", "text", "e.g. Jane Doe");
+        addInputCell("os", "text", "e.g. Windows 11");
+        addInputCell("manufacturer", "text", "e.g. Dell");
+        addInputCell("serialNumber", "text", "Serial #");
+        addInputCell("internalIP", "text", "e.g. 10.0.1.23");
+        addInputCell("lastReboot", "text", "e.g. 2025-12-10");
+        addInputCell("memoryUsable", "text", "e.g. 15.6 GB");
+        addInputCell("deviceCPU", "text", "e.g. i7-1185G7");
+        addInputCell("model", "text", "e.g. Latitude 7420");
+
+        const tdStatus = document.createElement("td");
+        const sel = document.createElement("select");
+        ["Good", "Needs Replaced"].forEach(opt => {
+          const o = document.createElement("option");
+          o.value = opt; o.textContent = opt;
+          sel.appendChild(o);
+        });
+        sel.value = pc.status || "Good";
+        sel.addEventListener("focus", () => pushHistory("Change Status"));
+        sel.addEventListener("change", () => {
+          pc.status = sel.value;
+          if (pc.status === "Good") {
+            pc.replacementDate = "";
+            pc.estimatedCost = "";
+          }
+          scheduleSave();
+          pushHistory("Change Status");
+          renderTable();
+        });
+        tdStatus.appendChild(sel);
+        tr.appendChild(tdStatus);
+
+        const tdRepDate = document.createElement("td");
+        if (pc.status === "Needs Replaced") {
+          const d = document.createElement("input");
+          d.type = "date";
+          d.value = pc.replacementDate ?? "";
+          d.addEventListener("focus", () => pushHistory("Edit Replacement Date"));
+          d.addEventListener("input", () => { pc.replacementDate = d.value; scheduleSave(); });
+          d.addEventListener("blur", () => pushHistory("Edit Replacement Date"));
+          tdRepDate.appendChild(d);
+        } else tdRepDate.innerHTML = `<span class="small">—</span>`;
+        tr.appendChild(tdRepDate);
+
+        const tdCost = document.createElement("td");
+        if (pc.status === "Needs Replaced") {
+          const c = document.createElement("input");
+          c.type = "text";
+          c.placeholder = "e.g. 1200";
+          c.value = pc.estimatedCost ?? "";
+          c.addEventListener("focus", () => pushHistory("Edit Estimated Cost"));
+          c.addEventListener("input", () => { pc.estimatedCost = c.value; scheduleSave(); });
+          c.addEventListener("blur", () => pushHistory("Edit Estimated Cost"));
+          tdCost.appendChild(c);
+        } else tdCost.innerHTML = `<span class="small">—</span>`;
+        tr.appendChild(tdCost);
+
+        addTextAreaCell("notes", "Notes…");
+
+        const tdActions = document.createElement("td");
+        tdActions.className = "right";
+        const btnDel = document.createElement("button");
+        btnDel.className = "btn danger";
+        btnDel.textContent = "Delete";
+        btnDel.addEventListener("click", () => {
+          pushHistory("Delete PC");
+          pcs.splice(idx, 1);
+          scheduleSave();
+          renderTable();
+          pushHistory("Delete PC");
+        });
+        tdActions.appendChild(btnDel);
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+      });
+
+      updateUndoUI();
+    }
+
+    // ---------------- Import ----------------
+    const headerMap = {
+      "hostname":"hostname","site":"site","last seen":"lastSeen","lastseen":"lastSeen",
+      "type":"type","last user":"lastUser","lastuser":"lastUser","os":"os",
+      "manufacturer":"manufacturer","serial number":"serialNumber","serialnumber":"serialNumber","serial":"serialNumber",
+      "internal ip":"internalIP","internalip":"internalIP","ip":"internalIP",
+      "last reboot":"lastReboot","lastreboot":"lastReboot",
+      "memory (usable)":"memoryUsable","memory usable":"memoryUsable","memory":"memoryUsable",
+      "device cpu":"deviceCPU","devicecpu":"deviceCPU","cpu":"deviceCPU","model":"model",
+      "status":"status","replacement date":"replacementDate","replace date":"replacementDate",
+      "estimated cost":"estimatedCost","est. cost":"estimatedCost","cost":"estimatedCost","notes":"notes"
+    };
+
+    function rowToPC(rowObj){
+      const pc = newBlankPC();
+      for (const [rawK, v] of Object.entries(rowObj)){
+        const k = normalizeHeader(rawK);
+        const mapped = headerMap[k];
+        if (!mapped) continue;
+
+        if (mapped === "status"){
+          const s = (v ?? "").toString().trim().toLowerCase();
+          pc.status = (s.includes("need") || s.includes("replace")) ? "Needs Replaced" : "Good";
+        } else if (mapped === "replacementDate"){
+          const d = parseDate(v);
+          pc.replacementDate = d ? fmtDate(d) : (v ?? "").toString().trim();
+        } else if (mapped === "estimatedCost"){
+          pc.estimatedCost = (v ?? "").toString().trim();
+        } else {
+          pc[mapped] = (v ?? "").toString().trim();
+        }
+      }
+      if (pc.replacementDate || pc.estimatedCost) pc.status = "Needs Replaced";
+      return pc;
+    }
+
+    async function importFile(file){
+      const name = file.name.toLowerCase();
+      $("#fileStatus").textContent = `Loaded: ${file.name}`;
+      pushHistory("Import File");
+
+      if (name.endsWith(".csv")){
+        const text = await file.text();
+        const rows = csvToObjects(text);
+        pcs = pcs.concat(rows.map(rowToPC));
+        scheduleSave();
+        renderTable();
+        pushHistory("Import File");
+        return;
+      }
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type: "array" });
+      const first = wb.SheetNames[0];
+      const ws = wb.Sheets[first];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
+      pcs = pcs.concat(json.map(rowToPC));
+      scheduleSave();
+      renderTable();
+      pushHistory("Import File");
+    }
+
+    function csvToObjects(csvText){
+      const lines = csvText.replace(/\r/g,"").split("\n").filter(l => l.trim().length > 0);
+      if (!lines.length) return [];
+      const headers = splitCSVLine(lines[0]).map(h => h.trim());
+      const out = [];
+      for (let i=1; i<lines.length; i++){
+        const vals = splitCSVLine(lines[i]);
+        const obj = {};
+        headers.forEach((h, idx) => obj[h] = (vals[idx] ?? "").trim());
+        out.push(obj);
+      }
+      return out;
+    }
+
+    function splitCSVLine(line){
+      const res = [];
+      let cur = "", inQ = false;
+      for (let i=0; i<line.length; i++){
+        const ch = line[i];
+        if (ch === '"'){
+          if (inQ && line[i+1] === '"'){ cur += '"'; i++; }
+          else inQ = !inQ;
+        } else if (ch === "," && !inQ){
+          res.push(cur); cur = "";
+        } else cur += ch;
+      }
+      res.push(cur);
+      return res;
+    }
+
+    // ---------------- Report ----------------
+    function generateReport(){
+      renderClientBox();
+
+      const good = pcs.filter(p => (p.status || "Good") === "Good");
+      const needs = pcs.filter(p => (p.status || "Good") === "Needs Replaced");
+
+      const needsSorted = [...needs].sort((a,b) => {
+        const da = parseDate(a.replacementDate);
+        const db = parseDate(b.replacementDate);
+        if (da && db) return da - db;
+        if (da && !db) return -1;
+        if (!da && db) return 1;
+        return 0;
+      });
+
+      const totalCost = needsSorted.reduce((sum, p) => sum + moneyToNumber(p.estimatedCost), 0);
+      const missingDates = needsSorted.filter(p => !parseDate(p.replacementDate)).length;
+
+      $("#kpiArea").innerHTML = `
+        <div class="box"><div class="label">Total Devices</div><div class="value">${pcs.length}</div></div>
+        <div class="box"><div class="label">Good</div><div class="value">${good.length}</div></div>
+        <div class="box"><div class="label">Needs Replaced</div><div class="value">${needsSorted.length}</div></div>
+        <div class="box"><div class="label">Projected Replacement Cost</div><div class="value">${fmtMoney(totalCost)}</div></div>
+      `;
+
+      $("#reportArea").innerHTML = `
+        <div class="card" style="padding:12px; margin-bottom:12px;">
+          <div><span class="pill ok">Good</span> <span class="small">${good.length} device(s)</span></div>
+          <div style="margin-top:10px; overflow:auto;">${buildReportTable(good, true)}</div>
+        </div>
+
+        <div class="card" style="padding:12px;">
+          <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <div><span class="pill bad">Needs Replaced</span> <span class="small">${needsSorted.length} device(s)</span></div>
+            <div class="small ${missingDates ? "warn" : ""}">${missingDates ? `${missingDates} item(s) missing Replacement Date.` : ""}</div>
+          </div>
+          <div style="margin-top:10px; overflow:auto;">${buildReportTable(needsSorted, false)}</div>
+        </div>
+      `;
+      renderTimeline(needsSorted);
+    }
+
+    function buildReportTable(items, isGood){
+      const cols = isGood
+        ? ["hostname","site","lastSeen","type","lastUser","os","manufacturer","serialNumber","internalIP","lastReboot","memoryUsable","deviceCPU","model","notes"]
+        : ["hostname","site","lastSeen","type","lastUser","os","manufacturer","serialNumber","internalIP","lastReboot","memoryUsable","deviceCPU","model","replacementDate","estimatedCost","notes"];
+
+      const headMap = {
+        hostname:"Hostname", site:"Site", lastSeen:"Last Seen", type:"Type", lastUser:"Last User", os:"OS",
+        manufacturer:"Manufacturer", serialNumber:"Serial Number", internalIP:"Internal IP", lastReboot:"Last Reboot",
+        memoryUsable:"Memory (Usable)", deviceCPU:"Device CPU", model:"Model",
+        replacementDate:"Replacement Date", estimatedCost:"Est. Cost", notes:"Notes"
+      };
+
+      const header = cols.map(c => `<th>${headMap[c]}</th>`).join("");
+      const rows = items.map(p => {
+        const tds = cols.map(c => {
+          let v = p[c] ?? "";
+          if (c === "estimatedCost") v = fmtMoney(moneyToNumber(v)) || "";
+          if (c === "notes") v = escapeHtml(v).replace(/\n/g,"<br>");
+          return `<td>${escapeHtml(v)}</td>`;
+        }).join("");
+        return `<tr>${tds}</tr>`;
+      }).join("");
+
+      return `
+        <table>
+          <thead><tr>${header}</tr></thead>
+          <tbody>${rows || `<tr><td colspan="${cols.length}" class="muted">No items.</td></tr>`}</tbody>
+        </table>
+      `;
+    }
+
+    // Timeline grouped by YEAR then MONTH (with month costs)
+    function renderTimeline(needs){
+      const byYear = new Map();
+      let missing = 0;
+
+      for (const p of needs){
+        const d = parseDate(p.replacementDate);
+        if (!d){ missing++; continue; }
+
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1;
+        const cost = moneyToNumber(p.estimatedCost);
+
+        if (!byYear.has(year)) byYear.set(year, new Map());
+        const byMonth = byYear.get(year);
+
+        if (!byMonth.has(month)) byMonth.set(month, { count: 0, cost: 0 });
+        const agg = byMonth.get(month);
+        agg.count += 1;
+        agg.cost += cost;
+      }
+
+      const years = [...byYear.keys()].sort((a,b) => a-b);
+      const area = $("#timelineArea");
+      area.innerHTML = "";
+
+      if (!years.length){
+        $("#timelineHint").textContent = missing
+          ? `Add Replacement Dates to see a timeline. (${missing} missing)`
+          : "No replacement items to show.";
+        return;
+      }
+
+      $("#timelineHint").textContent = missing ? `${missing} item(s) missing Replacement Date.` : "";
+
+      let maxCount = 1;
+      for (const y of years){
+        for (const v of byYear.get(y).values()){
+          if (v.count > maxCount) maxCount = v.count;
+        }
+      }
+
+      for (const y of years){
+        const byMonth = byYear.get(y);
+        const months = [...byMonth.keys()].sort((a,b) => a-b);
+
+        const yearTotalCost = months.reduce((sum, m) => sum + byMonth.get(m).cost, 0);
+        const yearTotalCount = months.reduce((sum, m) => sum + byMonth.get(m).count, 0);
+
+        const yearBlock = document.createElement("div");
+        yearBlock.className = "card";
+        yearBlock.style.padding = "12px";
+        yearBlock.style.borderRadius = "12px";
+        yearBlock.style.marginBottom = "10px";
+
+        yearBlock.innerHTML = `
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap;">
+            <div style="font-weight:950; font-size:14px;">${y}</div>
+            <div class="small">${yearTotalCount} device(s) • <b>${fmtMoney(yearTotalCost) || "$0"}</b></div>
+          </div>
+          <div class="timeline" style="margin-top:10px;" id="year-${y}"></div>
+        `;
+
+        area.appendChild(yearBlock);
+        const yearArea = yearBlock.querySelector(`#year-${y}`);
+
+        for (const m of months){
+          const v = byMonth.get(m);
+          const pct = Math.round((v.count / maxCount) * 100);
+
+          const row = document.createElement("div");
+          row.className = "barRow";
+          row.innerHTML = `
+            <div class="small">${monthName(m)} ${y}</div>
+            <div class="bar"><span style="width:${pct}%"></span></div>
+            <div class="small right">${v.count} • ${fmtMoney(v.cost) || "$0"}</div>
+          `;
+          yearArea.appendChild(row);
+        }
+      }
+    }
+
+    // ---------------- PDF Export ----------------
+    function buildBudgetBreakdown(needs){
+      const byYear = new Map();
+      let missing = 0;
+
+      for (const p of needs){
+        const d = parseDate(p.replacementDate);
+        if (!d){ missing++; continue; }
+
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1;
+        const cost = moneyToNumber(p.estimatedCost);
+
+        if (!byYear.has(year)) byYear.set(year, new Map());
+        const byMonth = byYear.get(year);
+
+        if (!byMonth.has(month)) byMonth.set(month, { count: 0, cost: 0 });
+        const agg = byMonth.get(month);
+        agg.count += 1;
+        agg.cost += cost;
+      }
+
+      const years = [...byYear.keys()].sort((a,b) => a-b);
+      let grandCost = 0;
+
+      const yearsOut = years.map(y => {
+        const monthsMap = byYear.get(y);
+        const months = [...monthsMap.keys()].sort((a,b) => a-b).map(m => {
+          const v = monthsMap.get(m);
+          return { month: m, count: v.count, cost: v.cost };
+        });
+        const yearCount = months.reduce((s,x) => s + x.count, 0);
+        const yearCost = months.reduce((s,x) => s + x.cost, 0);
+        grandCost += yearCost;
+        return { year: y, months, yearCount, yearCost };
+      });
+
+      return { years: yearsOut, missing, grandCost };
+    }
+
+    function exportNeedsReplacedPDF(){
+      const client = loadClient();
+
+      const needs = pcs
+        .filter(p => (p.status || "Good") === "Needs Replaced")
+        .map(p => ({...p}))
+        .sort((a,b) => {
+          const da = parseDate(a.replacementDate);
+          const db = parseDate(b.replacementDate);
+          if (da && db) return da - db;
+          if (da && !db) return -1;
+          if (!da && db) return 1;
+          return (a.hostname || "").localeCompare(b.hostname || "");
+        });
+
+      if (!needs.length){
+        alert("No devices are marked 'Needs Replaced'.");
+        return;
+      }
+
+      const breakdown = buildBudgetBreakdown(needs);
+
+      const rowsHtml = needs.map(p => {
+        const cost = moneyToNumber(p.estimatedCost);
+        return `
+          <tr>
+            <td>${escapeHtml(p.hostname || "")}</td>
+            <td>${escapeHtml(fmtDateHuman(p.replacementDate) || "")}</td>
+            <td style="text-align:right;">${escapeHtml(fmtMoney(cost) || "")}</td>
+          </tr>
+        `;
+      }).join("");
+
+      const breakdownHtml = breakdown.years.map(y => {
+        const monthRows = y.months.map(m => `
+          <tr>
+            <td>${escapeHtml(monthName(m.month) + " " + y.year)}</td>
+            <td style="text-align:right;">${m.count}</td>
+            <td style="text-align:right;">${escapeHtml(fmtMoney(m.cost) || "$0")}</td>
+          </tr>
+        `).join("");
+
+        return `
+          <div class="yearBlock">
+            <div class="yearHeader">
+              <div class="yearTitle">${y.year}</div>
+              <div class="yearTotals">${y.yearCount} device(s) • <b>${escapeHtml(fmtMoney(y.yearCost) || "$0")}</b></div>
+            </div>
+            <table class="breakdown">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th style="text-align:right;">Count</th>
+                  <th style="text-align:right;">Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${monthRows || `<tr><td colspan="3" class="muted">No dated replacements.</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }).join("");
+
+      const missingNote = breakdown.missing
+        ? `<div class="note"><b>${breakdown.missing}</b> device(s) missing Replacement Date (not shown in monthly breakdown).</div>`
+        : "";
+
+      const today = new Date();
+      const stamp = today.toLocaleDateString(undefined, { year:"numeric", month:"long", day:"2-digit" });
+
+      const clientBlock = `
+        <div class="clientBox">
+          <div class="clientTitle">${escapeHtml(client.name || "Client")}</div>
+          ${client.address ? `<div class="clientLine">${escapeHtml(client.address)}</div>` : ""}
+          ${([client.phone, client.email].filter(Boolean).length) ? `<div class="clientLine">${[client.phone, client.email].filter(Boolean).map(escapeHtml).join(" • ")}</div>` : ""}
+        </div>
+      `;
+
+      const printHtml = `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Needs-Replaced Report</title>
+  <style>
+    @page { size: Letter; margin: 0.65in; }
+    *{ box-sizing:border-box; }
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:#0d1320;
+      margin:0;
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      padding-bottom:12px;
+      border-bottom:2px solid #111827;
+      margin-bottom:10px;
+    }
+    .logoWrap{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .logoWrap img{
+      height:46px;
+      width:auto;
+      object-fit:contain;
+    }
+    .contact{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      line-height:1.2;
+    }
+    .contact .line1{ font-weight:900; font-size:12px; }
+    .contact .line2{ font-weight:700; font-size:12px; color:#374151; }
+
+    .meta{
+      text-align:right;
+      font-size:12px;
+      color:#374151;
+      line-height:1.3;
+      white-space:nowrap;
+    }
+
+    .clientBox{
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      background:#f9fafb;
+      padding:10px 12px;
+      margin: 10px 0 14px;
+    }
+    .clientTitle{
+      font-weight:950;
+      font-size:13px;
+      margin-bottom:4px;
+    }
+    .clientLine{
+      font-size:12px;
+      color:#374151;
+      line-height:1.3;
+    }
+
+    h1{
+      font-size:18px;
+      margin: 0 0 6px;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      font-size:12px;
+      color:#374151;
+      margin:0 0 14px;
+    }
+    .kpis{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin: 10px 0 18px;
+    }
+    .kpi{
+      border:1px solid #e5e7eb;
+      border-radius:10px;
+      padding:10px 12px;
+      min-width: 180px;
+      flex: 1 1 180px;
+      background:#f9fafb;
+    }
+    .kpi .label{ font-size:11px; color:#6b7280; font-weight:900; }
+    .kpi .value{ font-size:16px; font-weight:950; margin-top:4px; }
+
+    .sectionTitle{
+      font-size:13px;
+      font-weight:950;
+      margin: 18px 0 8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:10px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+    th, td{
+      padding: 8px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size:12px;
+      vertical-align:top;
+    }
+    th{
+      text-align:left;
+      color:#374151;
+      font-weight:950;
+      background:#f3f4f6;
+      border-top: 1px solid #e5e7eb;
+    }
+    tr{ page-break-inside:avoid; }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+    }
+    .yearBlock{
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:12px;
+      margin-bottom:12px;
+      page-break-inside:avoid;
+      background:#ffffff;
+    }
+    .yearHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:10px;
+      margin-bottom:10px;
+      border-bottom:1px solid #f3f4f6;
+      padding-bottom:8px;
+    }
+    .yearTitle{ font-weight:950; font-size:13px; }
+    .yearTotals{ font-size:12px; color:#374151; }
+
+    .breakdown th, .breakdown td{ font-size:11.5px; padding:7px 9px; }
+    .note{
+      margin-top:10px;
+      font-size:12px;
+      color:#92400e;
+      background:#fffbeb;
+      border:1px solid #f59e0b33;
+      padding:10px 12px;
+      border-radius:10px;
+    }
+    .footer{
+      margin-top:18px;
+      font-size:11px;
+      color:#6b7280;
+      border-top:1px solid #e5e7eb;
+      padding-top:10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logoWrap">
+      <img src="${escapeHtml(BRAND.logoUrl)}" alt="Sundance Networks" />
+      <div class="contact">
+        <div class="line1">${escapeHtml(BRAND.address)}</div>
+        <div class="line2">${escapeHtml(BRAND.phone)}</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div><b>Needs-Replaced Report</b></div>
+      <div>${escapeHtml(stamp)}</div>
+    </div>
+  </div>
+
+  ${clientBlock}
+
+  <h1>Devices Requiring Replacement</h1>
+  <p class="subtitle">This report includes only devices marked <b>Needs Replaced</b>.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Needs Replaced</div><div class="value">${needs.length}</div></div>
+    <div class="kpi"><div class="label">Projected Replacement Cost</div><div class="value">${escapeHtml(fmtMoney(breakdown.grandCost) || "$0")}</div></div>
+  </div>
+
+  <div class="sectionTitle">
+    <div>Replacement List</div>
+    <div style="font-size:12px; color:#374151;">Sorted by Replacement Date</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:50%;">Hostname</th>
+        <th style="width:25%;">Replacement By</th>
+        <th style="width:25%; text-align:right;">Estimated Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+
+  ${missingNote}
+
+  <div class="sectionTitle" style="margin-top:22px;">
+    <div>Budget Breakdown (Year → Month)</div>
+    <div style="font-size:12px; color:#374151;">Matches the on-page timeline style</div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      ${breakdownHtml || `<div class="yearBlock"><div class="yearHeader"><div class="yearTitle">No dated replacements</div></div></div>`}
+    </div>
+    <div>
+      <div class="yearBlock">
+        <div class="yearHeader">
+          <div class="yearTitle">Grand Total</div>
+          <div class="yearTotals"><b>${escapeHtml(fmtMoney(breakdown.grandCost) || "$0")}</b></div>
+        </div>
+        <table class="breakdown">
+          <thead>
+            <tr>
+              <th>Notes</th>
+              <th style="text-align:right;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Total devices marked Needs Replaced</td>
+              <td style="text-align:right;">${needs.length}</td>
+            </tr>
+            <tr>
+              <td>Total cost (sum of Estimated Cost)</td>
+              <td style="text-align:right;">${escapeHtml(fmtMoney(breakdown.grandCost) || "$0")}</td>
+            </tr>
+            <tr>
+              <td>Missing Replacement Date</td>
+              <td style="text-align:right;">${breakdown.missing}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="footer">
+          Tip: In the print dialog, choose <b>Destination → Save as PDF</b>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.onload = () => setTimeout(() => window.print(), 300);
+  <\/script>
+</body>
+</html>
+      `;
+
+      const w = window.open("", "_blank");
+      if (!w){
+        alert("Popup blocked. Please allow popups for this page, then try again.");
+        return;
+      }
+      w.document.open();
+      w.document.write(printHtml);
+      w.document.close();
+    }
+
+    // ---------------- CSV Export + Template ----------------
+    function download(filename, text, mime="text/plain"){
+      const blob = new Blob([text], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+
+    function csvEscape(v){
+      const s = (v ?? "").toString();
+      if (s.includes('"') || s.includes(",") || s.includes("\n")) return `"${s.replaceAll('"','""')}"`;
+      return s;
+    }
+
+    function exportCSV(){
+      const headers = [
+        "Hostname","Site","Last Seen","Type","Last User","OS","Manufacturer","Serial Number",
+        "Internal IP","Last Reboot","Memory (Usable)","Device CPU","Model",
+        "Status","Replacement Date","Estimated Cost","Notes"
+      ];
+      const lines = [headers.join(",")];
+      for (const p of pcs){
+        const row = [
+          p.hostname, p.site, p.lastSeen, p.type, p.lastUser, p.os, p.manufacturer, p.serialNumber,
+          p.internalIP, p.lastReboot, p.memoryUsable, p.deviceCPU, p.model,
+          p.status, p.replacementDate, p.estimatedCost, p.notes
+        ].map(csvEscape);
+        lines.push(row.join(","));
+      }
+      download("pc_replacement_list.csv", lines.join("\n"), "text/csv");
+    }
+
+    function downloadTemplate(){
+      const headers = [
+        "Hostname","Site","Last Seen","Type","Last User","OS","Manufacturer","Serial Number",
+        "Internal IP","Last Reboot","Memory (Usable)","Device CPU","Model",
+        "Status","Replacement Date","Estimated Cost","Notes"
+      ];
+      const example = [
+        ["WS-1234","HQ","2025-12-18 09:22","Laptop","Jane Doe","Windows 11","Dell","ABC123","10.0.1.23","2025-12-10","15.6 GB","i7-1185G7","Latitude 7420","Good","","",""],
+        ["WS-9910","Remote","2025-12-15 14:05","Desktop","Sam Lee","Windows 10","HP","XYZ987","10.0.4.77","2025-12-12","7.8 GB","i5-8500","EliteDesk 800","Needs Replaced","2026-03-01","900","Low memory / aging OS"]
+      ];
+      const lines = [headers.join(",")].concat(example.map(r => r.map(csvEscape).join(",")));
+      download("pc_replacement_template.csv", lines.join("\n"), "text/csv");
+    }
+
+    // ---------------- Wire Up ----------------
+    $("#btnAddRow").addEventListener("click", () => {
+      pushHistory("Add PC");
+      pcs.push(newBlankPC());
+      scheduleSave();
+      renderTable();
+      pushHistory("Add PC");
+    });
+
+    $("#btnGenerate").addEventListener("click", generateReport);
+    $("#btnExportNeedsPDF").addEventListener("click", exportNeedsReplacedPDF);
+    $("#btnExportCSV").addEventListener("click", exportCSV);
+    $("#btnDownloadTemplate").addEventListener("click", downloadTemplate);
+
+    $("#btnUndo").addEventListener("click", undo);
+    $("#btnRedo").addEventListener("click", redo);
+
+    $("#btnClearAll").addEventListener("click", () => {
+      const ok = confirm("Clear ALL devices and reports? (Client info will remain.)");
+      if (!ok) return;
+      pushHistory("Clear All");
+      pcs = [];
+      scheduleSave();
+      renderTable();
+      $("#reportArea").innerHTML = "";
+      $("#timelineArea").innerHTML = "";
+      $("#kpiArea").innerHTML = "";
+      $("#fileStatus").textContent = "No file loaded.";
+      $("#timelineHint").textContent = "";
+      renderClientBox();
+      pushHistory("Clear All");
+    });
+
+    $("#fileInput").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try { await importFile(file); }
+      catch (err){
+        console.error(err);
+        alert("Import failed. If using Excel, confirm you have internet access for the SheetJS CDN, or export CSV and import that instead.");
+      } finally { e.target.value = ""; }
+    });
+
+    // Toolbar events (NEW)
+    $("#searchInput").addEventListener("input", () => renderTable());
+    $("#statusFilter").addEventListener("change", () => renderTable());
+    $("#sortMode").addEventListener("change", () => renderTable());
+
+    // Scroll arrows
+    const wrap = $("#tableWrap");
+    $("#scrollLeft").addEventListener("click", () => {
+      const amt = Math.max(320, Math.floor(wrap.clientWidth * 0.75));
+      wrap.scrollBy({ left: -amt, behavior: "smooth" });
+    });
+    $("#scrollRight").addEventListener("click", () => {
+      const amt = Math.max(320, Math.floor(wrap.clientWidth * 0.75));
+      wrap.scrollBy({ left: amt, behavior: "smooth" });
+    });
+
+    // Shift + wheel horizontal scroll
+    wrap.addEventListener("wheel", (e) => {
+      if (!e.shiftKey) return;
+      e.preventDefault();
+      wrap.scrollBy({ left: e.deltaY, behavior: "auto" });
+    }, { passive: false });
+
+    // Client buttons
+    $("#btnSaveClient").addEventListener("click", () => {
+      pushHistory("Edit Client Info");
+      const client = getClientFromForm();
+      saveClient(client);
+      scheduleSave();
+      setClientSavedHint("Saved.");
+      renderClientBox();
+      pushHistory("Edit Client Info");
+    });
+
+    $("#btnClearClient").addEventListener("click", () => {
+      pushHistory("Clear Client Info");
+      saveClient({ name:"", address:"", phone:"", email:"" });
+      scheduleSave();
+      populateClientForm(loadClient());
+      setClientSavedHint("Cleared.");
+      renderClientBox();
+      pushHistory("Clear Client Info");
+    });
+
+    ["#clientName","#clientAddress","#clientPhone","#clientEmail"].forEach(sel => {
+      $(sel).addEventListener("focus", () => pushHistory("Edit Client Info"));
+      $(sel).addEventListener("input", () => { saveClient(getClientFromForm()); scheduleSave(); });
+      $(sel).addEventListener("blur", () => { saveClient(getClientFromForm()); scheduleSave(); renderClientBox(); pushHistory("Edit Client Info"); });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      const isMac = navigator.platform.toUpperCase().includes("MAC");
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+
+      const tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : "";
+      const inField = (tag === "input" || tag === "textarea" || tag === "select");
+
+      if (mod && key === "z" && !e.shiftKey){
+        if (!inField){ e.preventDefault(); undo(); }
+      } else if (mod && ((key === "y") || (key === "z" && e.shiftKey))){
+        if (!inField){ e.preventDefault(); redo(); }
+      }
+    });
+
+    // ---------------- Init ----------------
+    // Load & render client
+    const initClient = loadClient();
+    populateClientForm(initClient);
+    renderClientBox();
+
+    // Restore full saved state if available (NEW)
+    const saved = loadState();
+    if (saved && Array.isArray(saved.pcs) && saved.pcs.length){
+      pcs = saved.pcs;
+      if (saved.client){
+        saveClient(saved.client);
+        populateClientForm(loadClient());
+        renderClientBox();
+      }
+      setSaveUI("saved", `Restored • ${new Date().toLocaleTimeString()}`);
+    } else {
+      pcs.push(newBlankPC());
+      setSaveUI("off","Not saved yet");
+    }
+
+    renderTable();
+
+    // Prime history with initial state
+    pushHistory("Initial");
+    updateUndoUI();
+    scheduleSave();
+  </script>
+</body>
+</html>
